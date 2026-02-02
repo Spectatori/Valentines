@@ -127,6 +127,16 @@
             display: none;
         }
 
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            pointer-events: none;
+        }
+
         /* Floating hearts background */
         .wrapper {
             position: fixed;
@@ -313,6 +323,7 @@
     </style>
 </head>
 <body>
+    <!-- Floating hearts background -->
     <div class="wrapper">
         <div class="heart x1">❤️</div>
         <div class="heart x2">💕</div>
@@ -321,6 +332,8 @@
         <div class="heart x5">💓</div>
         <div class="heart x6">❤️</div>
     </div>
+
+    <canvas id="confetti-canvas"></canvas>
 
     <div id="root">
         <div class="centered" id="question-screen">
@@ -340,6 +353,8 @@
         </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <script>
         // State
         let isAccepted = false;
@@ -352,12 +367,52 @@
         const yesButton = document.getElementById('yes-button');
         const noButton = document.getElementById('no-button');
 
+        const fireConfetti = () => {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const colors = ['#ff69b4', '#ff1493', '#ffb6c1', '#ffffff', '#ffc0cb'];
+
+            const randomInRange = (min, max) => {
+                return Math.random() * (max - min) + min;
+            };
+
+            const confettiInterval = setInterval(() => {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(confettiInterval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+
+                // Left side
+                confetti({
+                    particleCount,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.8 },
+                    colors: colors
+                });
+
+                // Right side
+                confetti({
+                    particleCount,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.8 },
+                    colors: colors
+                });
+            }, 250);
+        };
+
         // Yes button handler
         yesButton.addEventListener('click', (e) => {
             e.preventDefault();
             isAccepted = true;
             questionScreen.classList.add('hidden');
             yesScreen.classList.remove('hidden');
+            
+            fireConfetti();
         });
 
         // No button movement logic
